@@ -1,9 +1,6 @@
 from sqlalchemy.orm import Session
 
 from table import Portfolio
-from database import SessionLocal
-
-session = SessionLocal()
 
 def create_position(db: Session, symbolCurrent: str, amountCurrent: float, entry_priceCurrent: float, trader_nameCurrent: str):
 
@@ -14,7 +11,15 @@ def create_position(db: Session, symbolCurrent: str, amountCurrent: float, entry
 
     db.add(new_position)
     db.commit()
-    db.refresh()
+    db.refresh(new_position)
 
 
-def
+def get_position_by_trader(db: Session, trader_nameCurrent: str):
+    result = db.query(Portfolio).filter(Portfolio.trader_name == trader_nameCurrent).all()
+
+    return result
+
+def freeze_position(db: Session, trader_nameCurrent: str, current_price: float):
+    db.query(Portfolio).filter(Portfolio.trader_name == trader_nameCurrent, Portfolio.entry_price > current_price).update({'is_frozen': True})
+
+    db.commit()
