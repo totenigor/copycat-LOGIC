@@ -1,9 +1,4 @@
-from backend.security import encrypt_data, decrypt_data
+from position_handling import get_current_price_for_asset
 
-slowo = "konwuj123"
-
-cicho = encrypt_data(slowo)
-print(f"cicho: {cicho}")
-
-print(f"glosno: {decrypt_data(cicho)}")
+get_current_price_for_asset("AAPL_US_EQ")
 

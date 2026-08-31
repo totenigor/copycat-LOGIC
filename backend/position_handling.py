@@ -2,6 +2,9 @@ import requests as rq
 import os
 from dotenv import load_dotenv
 
+import yfinance as yf
+from tr212_to_yfinance_ticker import convert_tr212_to_yfinance
+
 load_dotenv()
 
 urlSummary = "https://demo.trading212.com/api/v0/equity/account/summary"
@@ -38,3 +41,14 @@ def place_order(quantitylocal: float,symbol: str, sellOrBuy: str):
         print(f"Err: {response.status_code}")
 
 
+def get_current_price_for_asset(symbol: str) -> float:
+
+    try:
+        ticker = yf.Ticker(convert_tr212_to_yfinance(symbol))
+
+        currentPrice = ticker.info.get("currentPrice")
+
+        return currentPrice
+
+    except Exception as e:
+        print(f"An error occured during function execution: {e}")
