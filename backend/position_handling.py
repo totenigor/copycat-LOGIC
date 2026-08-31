@@ -22,6 +22,14 @@ def place_order(quantitylocal: float,symbol: str, sellOrBuy: str):
         quantitylocal = -quantitylocal
     elif sellOrBuy == "buy":
         quantitylocal = quantitylocal
+
+        try:
+            ticker = yf.Ticker(convert_tr212_to_yfinance(symbol))
+
+            currentPrice = ticker.info.get("currentPrice")
+
+        except Exception as e:
+            print(f"An error occured during function execution: {e}")
     else:
         raise Exception("Please choose option 'buy' or 'sell'")
 
@@ -41,14 +49,14 @@ def place_order(quantitylocal: float,symbol: str, sellOrBuy: str):
         print(f"Err: {response.status_code}")
 
 
-def get_current_price_for_asset(symbol: str) -> float:
+def get_current_price_for_asset(symbol: str):
 
     try:
         ticker = yf.Ticker(convert_tr212_to_yfinance(symbol))
 
         currentPrice = ticker.info.get("currentPrice")
 
-        return currentPrice
+        print(currentPrice)
 
     except Exception as e:
         print(f"An error occured during function execution: {e}")

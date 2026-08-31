@@ -19,7 +19,5 @@ def get_position_by_trader(db: Session, trader_nameCurrent: str):
 
     return result
 
-def freeze_position(db: Session, trader_nameCurrent: str, current_price: float):
-    db.query(Portfolio).filter(Portfolio.trader_name == trader_nameCurrent, Portfolio.entry_price > current_price).update({'is_frozen': True})
-
-    db.commit()
+def freeze_position(db: Session, trader_nameCurrent: str, current_price: float, ticker: str):
+    db.query(Portfolio).filter(Portfolio.trader_name == trader_nameCurrent, Portfolio.entry_price > current_price, Portfolio.symbol == ticker).update({'is_frozen': True})
