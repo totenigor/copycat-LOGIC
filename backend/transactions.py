@@ -21,8 +21,9 @@ def place_order(quantitylocal: float,symbol: str, sellOrBuy: str):
         quantitylocal = quantitylocal
     else:
         raise Exception("Please choose option 'buy' or 'sell'")
-    
+
     payload = {
+        "extendHours": True,
         "quantity": quantitylocal,
         "ticker": symbol,
     }
