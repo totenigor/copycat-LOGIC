@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from db.table import Portfolio
+from db.table import Portfolio, PreviousTrader
 
 from backend.position_handling import get_current_price_for_asset as current_price
 
@@ -15,6 +15,12 @@ def create_position(db: Session, symbolCurrent: str, amountCurrent: float, entry
     db.commit()
     db.refresh(new_position)
 
+def create_previous_trader(db: Session, trader_nameCurrent: str):
+    previous_trader = create_previous_trader(trader_name= trader_nameCurrent)
+
+    db.add(previous_trader)
+    db.commit()
+    db.refresh(previous_trader)
 
 def get_position_by_trader(db: Session, trader_nameCurrent: str):
     result = db.query(Portfolio).filter(Portfolio.trader_name == trader_nameCurrent).all()

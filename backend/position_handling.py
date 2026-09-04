@@ -9,6 +9,7 @@ from backend.tr212_to_yfinance_ticker import convert_tr212_to_yfinance
 
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
+from db.table import Portfolio
 from db.crud import create_position, get_positive_frozen_positions
 
 load_dotenv()
@@ -28,7 +29,7 @@ def get_db():
     finally:
         session.close()
 
-def place_order(quantitylocal: float,symbol: str, sellOrBuy: str, traderName: str):
+def place_order(quantitylocal: float,symbol: str, sellOrBuy: str, traderName: str, db: Session=Depends(get_db())):
 
     if sellOrBuy == "sell":
         quantitylocal = -quantitylocal
@@ -56,7 +57,12 @@ def place_order(quantitylocal: float,symbol: str, sellOrBuy: str, traderName: st
 
     if response.status_code == 200:
         print(data)
-        create_position(get_db(), quantitylocal, currentPrice, traderName)
+        if sellOrBuy == "buy":
+            create_position(get_db(), quantitylocal, currentPrice, traderName)
+        elif sellOrBuy == "sell":
+            position_to_erase = db.query(Portfolio).filter(Portfolio.trader_name == traderName, Portfolio.symbol == symbol).first()
+            db.delete(position_to_erase)
+            db.commit()
     else:
         print(f"Err: {response.status_code}")
 
@@ -89,7 +95,7 @@ def try_sell_positive_frozen_positions(previousTrader: str, db: Session = Depend
                 place_order(position.amount,position.symbol,"sell",previousTrader)
                 positionCount += 1
                 currEntryPrice = position.entry_price
-                profitSum += (position.amount * get_current_price_for_asset(position.symbol)) - currEntryPrice
+                profitSum += (position.amount * get_current_price_for_asset(position.symbol)) - (currEntryPrice * position.amount)
             except Exception as err:
                 error = True
                 print(f"encountered an error: {err}")

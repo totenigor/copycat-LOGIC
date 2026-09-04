@@ -3,9 +3,10 @@ from pydantic import BaseModel
 
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
-from db.crud import get_position_by_trader, freeze_position, check_frozen_position
+from db.crud import get_position_by_trader, freeze_position, create_previous_trader
 
 from backend.position_handling import place_order,get_current_price_for_asset
+from db.table import PreviousTrader
 
 router = APIRouter()
 
@@ -27,6 +28,14 @@ def get_db():
 def change_trader(data: TraderChange, db: Session = Depends(get_db)):
     print(f"Trader change started. Changing trader from {data.currentTrader} to {data.newTrader}")
 
+    trader_to_erase = db.query(PreviousTrader).order_by(PreviousTrader.id.asc()).first()
+
+    if trader_to_erase:
+        db.delete(trader_to_erase)
+        db.commit()
+    else:
+        print("No trader found to erase")
+
     all_positions = get_position_by_trader(db, data.currentTrader)
 
     print(f"Found {len(all_positions)} acquainted to this trader")
@@ -44,5 +53,7 @@ def change_trader(data: TraderChange, db: Session = Depends(get_db)):
             print(f"Sold {position.symbol} for {currentPrice-position.entry_price} profit")
 
     db.commit()
+
+    create_previous_trader(db, data.currentTrader)
 
     return {"status": "success", "message": f"Changed {data.currentTrader} to {data.newTrader}"}

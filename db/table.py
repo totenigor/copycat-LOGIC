@@ -11,3 +11,7 @@ class Portfolio(Base):
     trader_name = Column(String)
     is_frozen = Column(Boolean, default = False)
 
+class PreviousTrader(Base):
+    __tablename__ = "previous_trader"
+    id = Column(Integer, primary_key=True)
+    trader_name = Column(String)
