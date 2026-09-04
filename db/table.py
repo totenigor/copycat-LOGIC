@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean
 
-from database import Base
+from db.database import Base
 
 class Portfolio(Base):
     __tablename__ = "portfolio"

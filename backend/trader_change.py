@@ -1,11 +1,15 @@
-from fastapi import FastAPI, Depends
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
-from db.crud import get_position_by_trader, freeze_position
-from position_handling import place_order,get_current_price_for_asset
+from db.crud import get_position_by_trader, freeze_position, check_frozen_position
 
-app = FastAPI()
+from backend.position_handling import place_order,get_current_price_for_asset
+
+router = APIRouter()
+
+routerCheckFreeze = APIRouter()
 
 class TraderChange(BaseModel):
     currentTrader: str
@@ -19,7 +23,7 @@ def get_db():
         session.close()
 
 
-@app.post("/trader_change")
+@router.post("/trader-change")
 def change_trader(data: TraderChange, db: Session = Depends(get_db)):
     print(f"Trader change started. Changing trader from {data.currentTrader} to {data.newTrader}")
 
