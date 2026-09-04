@@ -3,10 +3,13 @@ import os
 from dotenv import load_dotenv
 
 import yfinance as yf
+from fastapi.params import Depends
+
 from backend.tr212_to_yfinance_ticker import convert_tr212_to_yfinance
 
+from sqlalchemy.orm import Session
 from db.database import SessionLocal
-from db.crud import create_position
+from db.crud import create_position, get_positive_frozen_positions
 
 load_dotenv()
 
@@ -71,4 +74,27 @@ def get_current_price_for_asset(symbol: str):
         print(f"An error occured during function execution: {e}")
 
 
-def sell_positive_frozen_positions()
+def try_sell_positive_frozen_positions(previousTrader: str, db: Session = Depends(get_db())):
+
+    positive_positions = get_positive_frozen_positions(db,previousTrader)
+
+    error: bool = False
+    if positive_positions:
+
+        positionCount = 0
+        currEntryPrice: float = 0
+        profitSum: float = 0
+        for position in positive_positions:
+            try:
+                place_order(position.amount,position.symbol,"sell",previousTrader)
+                positionCount += 1
+                currEntryPrice = position.entry_price
+                profitSum += (position.amount * get_current_price_for_asset(position.symbol)) - currEntryPrice
+            except Exception as err:
+                error = True
+                print(f"encountered an error: {err}")
+    else:
+        print("No positive frozen positions could be found")
+
+    if not error:
+        print(f"sold {positionCount} positions for overall profit of: {profitSum}")

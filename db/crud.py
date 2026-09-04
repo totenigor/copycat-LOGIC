@@ -24,5 +24,12 @@ def get_position_by_trader(db: Session, trader_nameCurrent: str):
 def freeze_position(db: Session, trader_nameCurrent: str, current_price: float, ticker: str):
     db.query(Portfolio).filter(Portfolio.trader_name == trader_nameCurrent, Portfolio.entry_price > current_price, Portfolio.symbol == ticker).update({'is_frozen': True})
 
-def get_positive_frozen_positions(db: Session, trader_nameCurrent: str):
-    db.query(Portfolio).filter(Portfolio.trader_name == trader_nameCurrent, Portfolio.entry_price <= current_price(Portfolio.symbol)).all()
+def get_positive_frozen_positions(db: Session, previousTrader: str):
+    frozenPositions = db.query(Portfolio).filter(Portfolio.trader_name == previousTrader, Portfolio.is_frozen == True).all()
+
+    result = [
+        position for position in frozenPositions
+        if position.entry_price <= current_price(position.symbol)
+    ]
+
+    return result
