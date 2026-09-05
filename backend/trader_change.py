@@ -47,7 +47,7 @@ def change_trader(data: TraderChange, db: Session = Depends(get_db)):
         if position.entry_price > currentPrice:
             freeze_position(db, data.currentTrader,currentPrice,position.symbol)
         else:
-            place_order(position.amount,position.symbol,"sell")
+            place_order(position.amount,position.symbol,"sell",data.currentTrader, db)
 
             db.delete(position)
             print(f"Sold {position.symbol} for {currentPrice-position.entry_price} profit")

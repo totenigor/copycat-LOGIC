@@ -16,7 +16,7 @@ def create_position(db: Session, symbolCurrent: str, amountCurrent: float, entry
     db.refresh(new_position)
 
 def create_previous_trader(db: Session, trader_nameCurrent: str):
-    previous_trader = create_previous_trader(trader_name= trader_nameCurrent)
+    previous_trader = PreviousTrader(trader_name= trader_nameCurrent)
 
     db.add(previous_trader)
     db.commit()

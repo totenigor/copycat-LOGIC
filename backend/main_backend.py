@@ -4,6 +4,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from backend.trader_change import router as tradeRouter
 
+from backend.position_handling import try_sell_positive_frozen_positions as tspfs
+
 import uvicorn
 
 
@@ -12,7 +14,7 @@ async def cycle(app: FastAPI):
 
     print("generuje gazylion dolarow...")
     scheduler = BackgroundScheduler()
-    scheduler.add_job(BigMoney,trigger='interval',seconds=15, args=["AAPL_US_EQ"])
+    scheduler.add_job(tspfs,trigger='interval',seconds=60)
     scheduler.start()
 
     yield
