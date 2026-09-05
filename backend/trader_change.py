@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
+from db.table import Portfolio
 from db.crud import get_position_by_trader, freeze_position, create_previous_trader
 
 from backend.position_handling import place_order,get_current_price_for_asset
@@ -57,3 +58,22 @@ def change_trader(data: TraderChange, db: Session = Depends(get_db)):
     create_previous_trader(db, data.currentTrader)
 
     return {"status": "success", "message": f"Changed {data.currentTrader} to {data.newTrader}"}
+
+@router.post("/pull-out")
+def pull_out(db: Session = Depends(get_db())):
+
+    currEntryPrice: float = 0
+    profitSum: float = 0
+    try:
+
+        positions = db.query(Portfolio).all()
+
+        for position in positions:
+            place_order(position.amount,position.symbol,"sell",position.trader_name,db)
+            currEntryPrice = position.entry_price
+            profitSum += (position.amount * get_current_price_for_asset(position.symbol)) - (currEntryPrice * position.amount)
+
+        return {"status": "success", "message": "pull-out from your positions completed", "profit/loss": profitSum}
+
+    except Exception as err:
+        return {"status": "error", "message": str(err)}

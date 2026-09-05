@@ -91,7 +91,7 @@ def try_sell_positive_frozen_positions():
 
         if positive_positions:
 
-            positionCount = 0
+            positionCount: float = 0
             currEntryPrice: float = 0
             profitSum: float = 0
             for position in positive_positions:
